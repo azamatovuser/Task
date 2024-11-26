@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy.util import deprecated
@@ -10,6 +10,7 @@ from models import Users
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
+from fastapi.templating import Jinja2Templates
 
 router = APIRouter(
     prefix="/auth",
@@ -22,7 +23,6 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 SECRET_KEY = "cb099aafd94ceb88718390eb257b07da23ba64cebe150048f6affdb8b462ac06"
 ALGORITHM = "HS256"
-
 
 def get_db():
     db = SessionLocal()
@@ -77,7 +77,15 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
 
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
+templates = Jinja2Templates(directory='templates/')
 
+@router.get('/login')
+async def login_function(request: Request):
+    return templates.TemplateResponse('login.html', {'request': request})
+
+@router.get('/register')
+async def register_function(request: Request):
+    return templates.TemplateResponse('register.html', {'request': request})
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(user_request: UserRequest, db: Session = Depends(get_db)):

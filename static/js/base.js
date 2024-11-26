@@ -181,10 +181,8 @@
             }
 
             const payload = {
-                email: data.email,
                 username: data.username,
-                first_name: data.firstname,
-                last_name: data.lastname,
+                full_name: data.full_name,
                 role: data.role,
                 phone_number: data.phone_number,
                 password: data.password
@@ -200,7 +198,7 @@
                 });
 
                 if (response.ok) {
-                    window.location.href = '/auth/login-page';
+                    window.location.href = '/auth/login';
                 } else {
                     // Handle error
                     const errorData = await response.json();
@@ -247,5 +245,5 @@
         }
     
         // Redirect to the login page
-        window.location.href = '/auth/login-page';
+        window.location.href = '/auth/login';
     };

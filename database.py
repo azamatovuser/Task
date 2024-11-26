@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 
-SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:postgres@localhost/TaskDatabase'
+SQLALCHEMY_DATABASE_URL = 'sqlite:///./task.db'
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
