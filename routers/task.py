@@ -1,15 +1,18 @@
 from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
 from routers.auth import get_current_user
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Task
+from starlette.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
+
+templates = Jinja2Templates(directory='templates/')
 
 router = APIRouter(
-    prefix='/task',
-    tags=['task']
+    prefix='/todos',
+    tags=['todos']
 )
 
 def get_db():
@@ -28,6 +31,29 @@ class TaskRequest(BaseModel):
 
 
 user_dependency = Annotated[dict, Depends(get_current_user)]
+
+
+def redirect_to_login():
+    redirect_response = RedirectResponse(url='/auth/login/', status_code=status.HTTP_302_FOUND)
+    redirect_response.delete_cookie(key='access_token')
+    return redirect_response
+
+
+@router.get('/todo-page')
+async def get_tasks(request: Request, db: Session = Depends(get_db)):
+    try:
+        user = await get_current_user(request.cookies.get('access_token'))
+        if not user:
+            return redirect_to_login()
+
+        tasks = db.query(Task).filter(Task.owner_id == user.get('id')).all()
+
+        return templates.TemplateResponse('task.html', {
+            "request": request,
+            "tasks": tasks
+        })
+    except:
+        pass
 
 
 @router.get("/")
